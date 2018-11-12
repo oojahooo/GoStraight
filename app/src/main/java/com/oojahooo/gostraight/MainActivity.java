@@ -1,36 +1,69 @@
 package com.oojahooo.gostraight;
 
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewGroup;
-
-import net.daum.mf.map.api.MapPOIItem;
-import net.daum.mf.map.api.MapPoint;
-import net.daum.mf.map.api.MapView;
+import android.widget.Button;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+
+    private final int MAP_FRAGMENT = 1;
+    private final int LIST_FRAGMENT = 2;
+
+    private Button bt_tab1, bt_tab2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MapView mapView = new MapView(this);
-        ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
-        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(37.5514579595, 126.951949155);
-        mapView.setMapCenterPoint(mapPoint, true);
-        //true면 앱 실행 시 애니메이션 효과가 나오고 false면 애니메이션이 나오지않음.
-        mapViewContainer.addView(mapView);
+        bt_tab1 = (Button)findViewById(R.id.bt_tab1);
+        bt_tab2 = (Button)findViewById(R.id.bt_tab2);
 
-        MapPOIItem marker = new MapPOIItem();
-        marker.setItemName("한세사이버보안고등학교");
-        marker.setTag(0);
-        marker.setMapPoint(mapPoint);
-        // 기본으로 제공하는 BluePin 마커 모양.
-        marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
-        // 마커를 클릭했을때, 기본으로 제공하는 RedPin 마커 모양.
-        marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
-        mapView.addPOIItem(marker);
+        bt_tab1.setOnClickListener(this);
+        bt_tab2.setOnClickListener(this);
+
+        callFragment(MAP_FRAGMENT);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.bt_tab1 :
+                // '버튼1' 클릭 시 '프래그먼트1' 호출
+                callFragment(MAP_FRAGMENT);
+                break;
+
+            case R.id.bt_tab2 :
+                // '버튼2' 클릭 시 '프래그먼트2' 호출
+                callFragment(LIST_FRAGMENT);
+                break;
+        }
+    }
+
+    private void callFragment(int frament_no){
+
+        // 프래그먼트 사용을 위해
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        switch (frament_no){
+            case 1:
+                // '프래그먼트1' 호출
+                MapFragment mf = new MapFragment();
+                transaction.replace(R.id.fragment_container, mf);
+                transaction.commit();
+                break;
+
+            case 2:
+                // '프래그먼트2' 호출
+                ListIprintFragment lif = new ListIprintFragment();
+                transaction.replace(R.id.fragment_container, lif);
+                transaction.commit();
+                break;
+        }
+
     }
 }
