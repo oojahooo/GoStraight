@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="buildings">
+        <item >하나스퀘어 주변(과학도서관, 아산이학관, 산학관 등등)</item>
+        <item >생명과학관(동관), 정보관, 미래융합기술관</item>
+        <item >사이언스파이파크 주변(신공학관, 애기능학생회관 등등)</item>
+        <item >정후방향(정경관, 교양관, 미디어관, 국제관 등등)</item>
+        <item >중앙광장(지하+백주년기념관)</item>
+        <item >경영대(엘포관, 현차관 등등)</item>
+        <item >의생명캠퍼스</item>
+    </string-array>
+</resources>

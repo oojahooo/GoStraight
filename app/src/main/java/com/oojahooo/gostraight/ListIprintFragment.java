@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -29,39 +30,18 @@ public class ListIprintFragment extends Fragment {
         ListView listview = (ListView)v.findViewById(R.id.iprint_listview);
         listview_iprints = new ArrayList<>();
         listview_adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, listview_iprints);
-        listview_iprints.add("Hello");
-        listview_iprints.add("World");
-        listview_iprints.add("Kim");
-        listview_iprints.add("Jaeho");
-        listview_iprints.add("Hello");
-        listview_iprints.add("World");
-        listview_iprints.add("Kim");
-        listview_iprints.add("Jaeho");
-        listview_iprints.add("Hello");
-        listview_iprints.add("World");
-        listview_iprints.add("Kim");
-        listview_iprints.add("Jaeho");
-        listview_iprints.add("Hello");
-        listview_iprints.add("World");
-        listview_iprints.add("Kim");
-        listview_iprints.add("Jaeho");
-        listview_iprints.add("Hello");
-        listview_iprints.add("World");
-        listview_iprints.add("Kim");
-        listview_iprints.add("Jaeho");
-        listview_iprints.add("Hello");
-        listview_iprints.add("World");
-        listview_iprints.add("Kim");
-        listview_iprints.add("Jaeho");
-        listview_iprints.add("Hello");
-        listview_iprints.add("World");
-        listview_iprints.add("Kim");
-        listview_iprints.add("Jaeho");
-        listview_iprints.add("Hello");
-        listview_iprints.add("World");
-        listview_iprints.add("Kim");
-        listview_iprints.add("Jaeho");
         listview.setAdapter(listview_adapter);
+
+        Spinner spinner_buildings = (Spinner)v.findViewById(R.id.building_spinner);
+        spinner_buildings.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //connect DB and select i-prints where is that building
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
         return v;
     }
 
