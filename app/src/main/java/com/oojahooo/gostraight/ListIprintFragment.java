@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.database.sqlite.*;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -20,9 +21,13 @@ import java.util.List;
 public class ListIprintFragment extends Fragment {
     List<String> listview_iprints;
     ArrayAdapter<String> listview_adapter;
+    final int IPRINT = 0;
+    final int WATER = 1;
+    final int VENDING = 2;
+    final int ATM = 3;
+    int category, building;
 
-    public ListIprintFragment() {
-    }
+    public ListIprintFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,16 +37,29 @@ public class ListIprintFragment extends Fragment {
         listview_adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, listview_iprints);
         listview.setAdapter(listview_adapter);
 
-        Spinner spinner_buildings = (Spinner)v.findViewById(R.id.building_spinner);
-        spinner_buildings.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        final Spinner spinner_categories = (Spinner)v.findViewById(R.id.category_spinner);
+        spinner_categories.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //connect DB and select i-prints where is that building
+                category = position;
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+
+       Spinner spinner_buildings = (Spinner)v.findViewById(R.id.building_spinner);
+        spinner_buildings.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                building = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+
         return v;
     }
 

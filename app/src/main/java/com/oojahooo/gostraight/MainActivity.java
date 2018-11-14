@@ -15,10 +15,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button bt_tab1, bt_tab2;
 
+    private DBAdapter mDBAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mDBAdapter = new DBAdapter(this);
+        mDBAdapter.open();
 
         bt_tab1 = (Button)findViewById(R.id.bt_tab1);
         bt_tab2 = (Button)findViewById(R.id.bt_tab2);
@@ -30,15 +35,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    protected void onDestroy() {
+        mDBAdapter.close();
+        super.onDestroy();
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.bt_tab1 :
-                // '버튼1' 클릭 시 '프래그먼트1' 호출
+                // '버튼1' 클릭 시 '맵 프래그먼트' 호출
                 callFragment(MAP_FRAGMENT);
                 break;
 
             case R.id.bt_tab2 :
-                // '버튼2' 클릭 시 '프래그먼트2' 호출
+                // '버튼2' 클릭 시 '리스트 프래그먼트' 호출
                 callFragment(LIST_FRAGMENT);
                 break;
         }
@@ -51,14 +62,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (frament_no){
             case 1:
-                // '프래그먼트1' 호출
+                // '맵 프래그먼트' 호출
                 MapFragment mf = new MapFragment();
                 transaction.replace(R.id.fragment_container, mf);
                 transaction.commit();
                 break;
 
             case 2:
-                // '프래그먼트2' 호출
+                // '리스트 프래그먼트' 호출
                 ListIprintFragment lif = new ListIprintFragment();
                 transaction.replace(R.id.fragment_container, lif);
                 transaction.commit();
