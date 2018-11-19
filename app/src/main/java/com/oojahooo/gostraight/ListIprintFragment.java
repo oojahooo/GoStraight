@@ -60,6 +60,8 @@ public class ListIprintFragment extends Fragment {
         });
 
 
+
+
         return v;
     }
 

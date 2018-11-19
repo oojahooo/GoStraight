@@ -16,12 +16,21 @@
             android:name="com.kakao.sdk.AppKey"
             android:value="633c5218713374ed2176eb033ce0ef5e" />
 
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".SplashActivity"
+            android:theme="@style/SplashTheme"
+            android:screenOrientation="portrait">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+        </activity>
+        
+        <activity android:name=".MainActivity">
+
         </activity>
     </application>
 
