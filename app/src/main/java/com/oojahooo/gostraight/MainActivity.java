@@ -1,11 +1,22 @@
 package com.oojahooo.gostraight;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
@@ -15,15 +26,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button bt_tab1, bt_tab2;
 
-    private DBAdapter mDBAdapter;
+    public static final String ROOT_DIR = "/data/data/com.oojahooo.gostraight/databases/";
+
+    private static final String TAG = "DbAdapter";
+    public SQLiteDatabase mDb;
+    public Cursor cursor;
+    ProductDBHelper mDbHelper;
+
+    private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS FACILITY (_id integer primary key autoincrement, category integer, section integer, detail text not null);";
+    private static final String DATABASE_NAME = "gostraight.db";
+    private static final String DATABASE_TABLE = "FACILITY";
+    private static final int DATABASE_VERSION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mDBAdapter = new DBAdapter(this);
-        mDBAdapter.open();
+        setDB(this);
+        mDbHelper = new ProductDBHelper(this);
+        mDb = mDbHelper.getWritableDatabase();
 
         bt_tab1 = (Button)findViewById(R.id.bt_tab1);
         bt_tab2 = (Button)findViewById(R.id.bt_tab2);
@@ -32,12 +54,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bt_tab2.setOnClickListener(this);
 
         callFragment(MAP_FRAGMENT);
-    }
-
-    @Override
-    protected void onDestroy() {
-        mDBAdapter.close();
-        super.onDestroy();
     }
 
     @Override
@@ -77,4 +93,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
+
+    public static void setDB(Context ctx) {
+        File folder = new File(ROOT_DIR);
+        if(folder.exists()) {
+        } else {
+            folder.mkdirs();
+        }
+        AssetManager assetManager = ctx.getResources().getAssets();
+        File outfile = new File(ROOT_DIR+DATABASE_NAME);
+        InputStream is = null;
+        FileOutputStream fo = null;
+        long filesize = 0;
+        try {
+            is = assetManager.open(DATABASE_NAME, AssetManager.ACCESS_BUFFER);
+            filesize = is.available();
+            if (outfile.length() <= 0) {
+                byte[] tempdata = new byte[(int) filesize];
+                is.read(tempdata);
+                is.close();
+                outfile.createNewFile();
+                fo = new FileOutputStream(outfile);
+                fo.write(tempdata);
+                fo.close();
+            } else {}
+        } catch (IOException e) {}
+    }
+
+    class ProductDBHelper extends SQLiteOpenHelper {
+        public ProductDBHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) { db.execSQL(DATABASE_CREATE);}
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.w(TAG, "Upgrading db from version" + oldVersion + " to" +
+                    newVersion + ", which will destroy all old data");
+            db.execSQL("DROP TABLE IF EXISTS data");
+            onCreate(db);
+        }
+    }
+
 }
