@@ -28,10 +28,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static final String ROOT_DIR = "/data/data/com.oojahooo.gostraight/databases/";
 
-    private static final String TAG = "DbAdapter";
     public SQLiteDatabase mDb;
     public Cursor cursor;
-    ProductDBHelper mDbHelper;
+    GostraightDBHelper mDbHelper;
 
     private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS FACILITY (_id integer primary key autoincrement, category integer, section integer, detail text not null);";
     private static final String DATABASE_NAME = "gostraight.db";
@@ -44,8 +43,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         setDB(this);
-        mDbHelper = new ProductDBHelper(this);
-        mDb = mDbHelper.getWritableDatabase();
+        mDbHelper = new GostraightDBHelper(this);
+        mDb = mDbHelper.getReadableDatabase();
 
         bt_tab1 = (Button)findViewById(R.id.bt_tab1);
         bt_tab2 = (Button)findViewById(R.id.bt_tab2);
@@ -71,12 +70,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void callFragment(int frament_no){
+    private void callFragment(int fragment_no){
 
         // 프래그먼트 사용을 위해
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        switch (frament_no){
+        switch (fragment_no){
             case 1:
                 // '맵 프래그먼트' 호출
                 MapFragment mf = new MapFragment();
@@ -119,21 +118,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else {}
         } catch (IOException e) {}
     }
-
-    class ProductDBHelper extends SQLiteOpenHelper {
-        public ProductDBHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) { db.execSQL(DATABASE_CREATE);}
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(TAG, "Upgrading db from version" + oldVersion + " to" +
-                    newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS data");
-            onCreate(db);
-        }
-    }
-
 }
