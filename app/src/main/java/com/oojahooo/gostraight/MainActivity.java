@@ -2,15 +2,11 @@ package com.oojahooo.gostraight;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 
 import java.io.File;
@@ -24,18 +20,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final int MAP_FRAGMENT = 1;
     private final int LIST_FRAGMENT = 2;
 
-    private Button bt_tab1, bt_tab2;
+    private Button bt_map, bt_list;
 
-    public static final String ROOT_DIR = "/data/data/com.oojahooo.gostraight/databases/";
-
-    public SQLiteDatabase mDb;
-    public Cursor cursor;
+    public static SQLiteDatabase mDb;
     GostraightDBHelper mDbHelper;
 
-    private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS FACILITY (_id integer primary key autoincrement, category integer, section integer, detail text not null);";
     private static final String DATABASE_NAME = "gostraight.db";
-    private static final String DATABASE_TABLE = "FACILITY";
-    private static final int DATABASE_VERSION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +33,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         setDB(this);
-        mDbHelper = new GostraightDBHelper(this);
-        mDb = mDbHelper.getReadableDatabase();
+        this.mDbHelper = new GostraightDBHelper(this);
+        this.mDb = mDbHelper.getReadableDatabase();
 
-        bt_tab1 = (Button)findViewById(R.id.bt_tab1);
-        bt_tab2 = (Button)findViewById(R.id.bt_tab2);
+        bt_map = (Button)findViewById(R.id.bt_map);
+        bt_list = (Button)findViewById(R.id.bt_list);
 
-        bt_tab1.setOnClickListener(this);
-        bt_tab2.setOnClickListener(this);
+        bt_map.setOnClickListener(this);
+        bt_list.setOnClickListener(this);
 
         callFragment(MAP_FRAGMENT);
     }
@@ -58,13 +48,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.bt_tab1 :
-                // '버튼1' 클릭 시 '맵 프래그먼트' 호출
+            case R.id.bt_map :
+                // '지도' 버튼 클릭 시 '맵 프래그먼트' 호출
                 callFragment(MAP_FRAGMENT);
                 break;
 
-            case R.id.bt_tab2 :
-                // '버튼2' 클릭 시 '리스트 프래그먼트' 호출
+            case R.id.bt_list :
+                // '목록' 버튼 클릭 시 '리스트 프래그먼트' 호출
                 callFragment(LIST_FRAGMENT);
                 break;
         }
@@ -94,27 +84,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public static void setDB(Context ctx) {
-        File folder = new File(ROOT_DIR);
-        if(folder.exists()) {
+        File databasesfolder = ctx.getDatabasePath(DATABASE_NAME).getParentFile();
+        if(databasesfolder.exists()) {
         } else {
-            folder.mkdirs();
+            databasesfolder.mkdirs();
         }
         AssetManager assetManager = ctx.getResources().getAssets();
-        File outfile = new File(ROOT_DIR+DATABASE_NAME);
+        File outfile = new File(ctx.getDatabasePath(DATABASE_NAME).getParentFile().toString() + "/" +DATABASE_NAME);
         InputStream is = null;
-        FileOutputStream fo = null;
-        long filesize = 0;
+        FileOutputStream fos = null;
+        long fileSize = 0;
         try {
             is = assetManager.open(DATABASE_NAME, AssetManager.ACCESS_BUFFER);
-            filesize = is.available();
+            fileSize = is.available();
             if (outfile.length() <= 0) {
-                byte[] tempdata = new byte[(int) filesize];
+                byte[] tempdata = new byte[(int) fileSize];
                 is.read(tempdata);
                 is.close();
                 outfile.createNewFile();
-                fo = new FileOutputStream(outfile);
-                fo.write(tempdata);
-                fo.close();
+                fos = new FileOutputStream(outfile);
+                fos.write(tempdata);
+                fos.close();
             } else {}
         } catch (IOException e) {}
     }

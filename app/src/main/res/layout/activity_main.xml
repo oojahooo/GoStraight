@@ -21,17 +21,17 @@
 
         <Button
             android:layout_weight="1"
-            android:id="@+id/bt_tab1"
+            android:id="@+id/bt_map"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tab 1"/>
+            android:text="지도"/>
 
         <Button
             android:layout_weight="1"
-            android:id="@+id/bt_tab2"
+            android:id="@+id/bt_list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tab 2"/>
+            android:text="목록"/>
 
     </LinearLayout>
 

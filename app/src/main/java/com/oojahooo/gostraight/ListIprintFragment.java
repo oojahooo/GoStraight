@@ -1,5 +1,6 @@
 package com.oojahooo.gostraight;
 
+import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +28,8 @@ public class ListIprintFragment extends Fragment {
     final int ATM = 3;
     int category, building;
 
+    Cursor cursor = MainActivity.mDb.rawQuery(GostraightDBCtruct.SQL_SELECT, null);
+
     public ListIprintFragment() {}
 
     @Override
@@ -36,6 +39,33 @@ public class ListIprintFragment extends Fragment {
         listview_iprints = new ArrayList<>();
         listview_adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, listview_iprints);
         listview.setAdapter(listview_adapter);
+
+        String iprinttext;
+
+        if((cursor != null && cursor.getCount() != 0)) {
+            cursor.moveToFirst();
+            do {
+                iprinttext = "";
+                int category = cursor.getInt(1);
+                switch (category) {
+                    case IPRINT:
+                        iprinttext += "아이프린트, ";
+                        break;
+                    case WATER:
+                        iprinttext += "정수기, ";
+                        break;
+                    case VENDING:
+                        iprinttext += "자판기, ";
+                        break;
+                    case ATM:
+                        iprinttext += "ATM, ";
+                        break;
+                }
+                iprinttext += cursor.getString(2) + ", " + cursor.getString(3);
+                listview_iprints.add(iprinttext);
+                cursor.moveToNext();
+            } while(!cursor.isLast());
+        }
 
         final Spinner spinner_categories = (Spinner)v.findViewById(R.id.category_spinner);
         spinner_categories.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -58,8 +88,6 @@ public class ListIprintFragment extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-
-
 
 
         return v;
