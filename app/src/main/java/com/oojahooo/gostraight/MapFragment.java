@@ -1,6 +1,8 @@
 package com.oojahooo.gostraight;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +12,11 @@ import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapView;
 
-public class MapFragment extends Fragment {
+public class MapFragment extends Fragment implements View.OnClickListener {
+
+    private FloatingActionButton fab;
+    public MapView mapView;
+
     public MapFragment() {}
 
     @Override
@@ -29,6 +35,18 @@ public class MapFragment extends Fragment {
         marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
         marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
         mapView.addPOIItem(marker);
+
+        fab = (FloatingActionButton)v.findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(this);
         return v;
     }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if(id == R.id.floatingActionButton) {
+            mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeading);
+        }
+    }
+
 }

@@ -2,17 +2,22 @@ package com.oojahooo.gostraight;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.Spinner;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
@@ -24,8 +29,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public static SQLiteDatabase mDb;
     GostraightDBHelper mDbHelper;
+    Cursor cursor;
 
     private static final String DATABASE_NAME = "gostraight.db";
+
+    public final int IPRINT = 0;
+    public final int WATER = 1;
+    public final int VENDING = 2;
+    public final int ATM = 3;
+
+    public static List<String> listview_iprints;
+    int category, building;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,12 +49,64 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setDB(this);
         this.mDbHelper = new GostraightDBHelper(this);
         this.mDb = mDbHelper.getReadableDatabase();
+        this.listview_iprints = new ArrayList<>();
+
+        cursor = MainActivity.mDb.rawQuery(GostraightDBCtruct.SQL_SELECT, null);
+
+        String iprinttext;
+
+        if((cursor != null && cursor.getCount() != 0)) {
+            cursor.moveToFirst();
+            do {
+                iprinttext = "";
+                int category = cursor.getInt(1);
+                switch (category) {
+                    case IPRINT:
+                        iprinttext += "아이프린트, ";
+                        break;
+                    case WATER:
+                        iprinttext += "정수기, ";
+                        break;
+                    case VENDING:
+                        iprinttext += "자판기, ";
+                        break;
+                    case ATM:
+                        iprinttext += "ATM, ";
+                        break;
+                }
+                iprinttext += cursor.getString(2) + ", " + cursor.getString(3);
+                this.listview_iprints.add(iprinttext);
+                cursor.moveToNext();
+            } while(!cursor.isLast());
+        }
 
         bt_map = (Button)findViewById(R.id.bt_map);
         bt_list = (Button)findViewById(R.id.bt_list);
 
         bt_map.setOnClickListener(this);
         bt_list.setOnClickListener(this);
+
+        final Spinner spinner_categories = (Spinner)findViewById(R.id.category_spinner);
+        spinner_categories.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                category = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        Spinner spinner_buildings = (Spinner)findViewById(R.id.building_spinner);
+        spinner_buildings.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                building = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         callFragment(MAP_FRAGMENT);
     }
