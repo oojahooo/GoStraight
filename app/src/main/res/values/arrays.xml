@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="buildings">
+        <item >----구역선택----</item>
         <item >하나스퀘어 주변(과학도서관, 아산이학관, 산학관 등등)</item>
         <item >생명과학관(동관), 정보관, 미래융합기술관</item>
         <item >사이언스파이파크 주변(신공학관, 애기능학생회관 등등)</item>
@@ -10,6 +11,7 @@
         <item >의생명캠퍼스</item>
     </string-array>
     <string-array name="categories">
+        <item >----종류선택----</item>
         <item >아이프린트</item>
         <item >정수기</item>
         <item >자판기</item>

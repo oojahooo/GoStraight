@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -33,10 +34,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String DATABASE_NAME = "gostraight.db";
 
-    public final int IPRINT = 0;
-    public final int WATER = 1;
-    public final int VENDING = 2;
-    public final int ATM = 3;
+    public static final int IPRINT = 0;
+    public static final int WATER = 1;
+    public static final int VENDING = 2;
+    public static final int ATM = 3;
 
     public static List<String> listview_iprints;
     int category, building;
