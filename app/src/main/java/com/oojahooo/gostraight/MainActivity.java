@@ -9,22 +9,27 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private final int MAP_FRAGMENT = 1;
     private final int LIST_FRAGMENT = 2;
+    private int FRAGMENT_STATE = MAP_FRAGMENT;
 
     private Button bt_map, bt_list;
 
@@ -34,18 +39,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String DATABASE_NAME = "gostraight.db";
 
-    public static final int IPRINT = 0;
-    public static final int WATER = 1;
-    public static final int VENDING = 2;
-    public static final int ATM = 3;
+    public static final int IPRINT = 1;
+    public static final int WATER = 2;
+    public static final int VENDING = 3;
+    public static final int ATM = 4;
 
     public static List<String> listview_iprints;
-    int category, building;
+    public static int category = 0;
+    public static int section = 0;
+    public static HashMap<Integer, ArrayList> sectionBuilding = new HashMap<Integer, ArrayList>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        for(int i = 0; i < 10; i++) {
+            sectionBuilding.put(i, new ArrayList<String>());
+        }
+        sectionBuilding.put(1, new ArrayList<String>(Arrays.asList("하나스퀘어", "과학도서관", "아산이학관", "산학관", "하나과학관", "생명과학관(서관)", "CJ식품안전관")));
+        sectionBuilding.put(2, new ArrayList<String>(Arrays.asList("생명과학관(동관)", "우정정보관", "미래융합기술관", "애기능생활관")));
+        sectionBuilding.put(3, new ArrayList<String>(Arrays.asList("공학관", "이학관별관", "창의관", "신공학관", "애기능학생회관")));
+        sectionBuilding.put(4, new ArrayList<String>(Arrays.asList("정경관", "미디어관", "우당교양관", "타이거프라자", "국제관", "인촌기념관")));
+        sectionBuilding.put(5, new ArrayList<String>(Arrays.asList("우당교양관", "학생회관", "홍보관", "4.18기념관", "SK미래관")));
+        sectionBuilding.put(6, new ArrayList<String>(Arrays.asList("SK미래관", "서관(문과대학)", "본관", "중앙광장지하", "본관", "100주년기념삼성관")));
+        sectionBuilding.put(7, new ArrayList<String>(Arrays.asList("대학원도서관", "법학관구관", "법학관신관", "해송법학도서관", "동원글로벌리더쉽홀", "CJ법학관", "아세아문제연구소", "법학관신관")));
+        sectionBuilding.put(8, new ArrayList<String>(Arrays.asList("사범대학본관", "사범대학신관", "운초우선교육관", "체육생활관", "교우회관", "현대자동차경영관", "경영본관", "LG-POSCO경영관")));
+
+        final Spinner spinner_categories = (Spinner)findViewById(R.id.category_spinner);
+        spinner_categories.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                category = position;
+                Toast.makeText(getApplicationContext(), "선택된 번호: " + category, Toast.LENGTH_LONG).show();
+                callFragment(FRAGMENT_STATE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        final Spinner spinner_buildings = (Spinner)findViewById(R.id.building_spinner);
+        spinner_buildings.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                section = position;
+                //Toast.makeText(getApplicationContext(), "선택된 번호: " + section, Toast.LENGTH_LONG).show();
+                callFragment(FRAGMENT_STATE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         setDB(this);
         this.mDbHelper = new GostraightDBHelper(this);
@@ -60,23 +105,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             cursor.moveToFirst();
             do {
                 iprinttext = "";
-                int category = cursor.getInt(1);
-                switch (category) {
-                    case IPRINT:
-                        iprinttext += "아이프린트, ";
-                        break;
-                    case WATER:
-                        iprinttext += "정수기, ";
-                        break;
-                    case VENDING:
-                        iprinttext += "자판기, ";
-                        break;
-                    case ATM:
-                        iprinttext += "ATM, ";
-                        break;
+                int newcategory = cursor.getInt(1);
+
+                if(category == 0 || newcategory == category) {
+                    switch (newcategory) {
+                        case IPRINT:
+                            iprinttext += "아이프린트, ";
+                            break;
+                        case WATER:
+                            iprinttext += "정수기, ";
+                            break;
+                        case VENDING:
+                            iprinttext += "자판기, ";
+                            break;
+                        case ATM:
+                            iprinttext += "ATM, ";
+                            break;
+                    }
+                    iprinttext += cursor.getString(2) + ", " + cursor.getString(3);
+                    this.listview_iprints.add(iprinttext);
                 }
-                iprinttext += cursor.getString(2) + ", " + cursor.getString(3);
-                this.listview_iprints.add(iprinttext);
                 cursor.moveToNext();
             } while(!cursor.isLast());
         }
@@ -87,41 +135,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bt_map.setOnClickListener(this);
         bt_list.setOnClickListener(this);
 
-        final Spinner spinner_categories = (Spinner)findViewById(R.id.category_spinner);
-        spinner_categories.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                category = position;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
-        Spinner spinner_buildings = (Spinner)findViewById(R.id.building_spinner);
-        spinner_buildings.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                building = position;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
         callFragment(MAP_FRAGMENT);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.bt_map :
-                // '지도' 버튼 클릭 시 '맵 프래그먼트' 호출
+            case R.id.bt_map :  // '지도' 버튼 클릭 시 '맵 프래그먼트' 호출
+                FRAGMENT_STATE = MAP_FRAGMENT;
                 callFragment(MAP_FRAGMENT);
                 break;
 
-            case R.id.bt_list :
-                // '목록' 버튼 클릭 시 '리스트 프래그먼트' 호출
+            case R.id.bt_list :  // '목록' 버튼 클릭 시 '리스트 프래그먼트' 호출
+                FRAGMENT_STATE = LIST_FRAGMENT;
                 callFragment(LIST_FRAGMENT);
                 break;
         }

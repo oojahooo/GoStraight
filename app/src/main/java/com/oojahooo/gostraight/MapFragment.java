@@ -23,6 +23,8 @@ import static com.oojahooo.gostraight.MainActivity.ATM;
 import static com.oojahooo.gostraight.MainActivity.IPRINT;
 import static com.oojahooo.gostraight.MainActivity.VENDING;
 import static com.oojahooo.gostraight.MainActivity.WATER;
+import static com.oojahooo.gostraight.MainActivity.category;
+import static com.oojahooo.gostraight.MainActivity.section;
 
 public class MapFragment extends Fragment implements View.OnClickListener, MapView.MapViewEventListener, MapView.CurrentLocationEventListener {
 
@@ -44,32 +46,36 @@ public class MapFragment extends Fragment implements View.OnClickListener, MapVi
 
         cursor = MainActivity.mDb.rawQuery(GostraightDBCtruct.SQL_SELECT, null);
 
+        mapView.removeAllPOIItems();
+
         if ((cursor != null && cursor.getCount() != 0)) {
             cursor.moveToFirst();
             do {
-                int category = cursor.getInt(1);
-                lat = cursor.getDouble(4);
-                lon = cursor.getDouble(5);
-                MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lon);
-                MapPOIItem marker = new MapPOIItem();
-                switch (category) {
-                    case IPRINT:
-                        marker.setItemName("아이프린트");
-                        break;
-                    case WATER:
-                        marker.setItemName("정수기");
-                        break;
-                    case VENDING:
-                        marker.setItemName("자판기");
-                        break;
-                    case ATM:
-                        marker.setItemName("ATM");
-                        break;
+                int newcategory = cursor.getInt(1);
+                if(category == 0 || (category != 0 && category == newcategory)) {
+                    lat = cursor.getDouble(4);
+                    lon = cursor.getDouble(5);
+                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lon);
+                    MapPOIItem marker = new MapPOIItem();
+                    switch (newcategory) {
+                        case IPRINT:
+                            marker.setItemName("아이프린트");
+                            break;
+                        case WATER:
+                            marker.setItemName("정수기");
+                            break;
+                        case VENDING:
+                            marker.setItemName("자판기");
+                            break;
+                        case ATM:
+                            marker.setItemName("ATM");
+                            break;
+                    }
+                    marker.setMapPoint(mapPoint);
+                    marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
+                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
+                    this.mapView.addPOIItem(marker);
                 }
-                marker.setMapPoint(mapPoint);
-                marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
-                marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
-                this.mapView.addPOIItem(marker);
                 cursor.moveToNext();
             } while (!cursor.isLast());
         }
@@ -101,8 +107,17 @@ public class MapFragment extends Fragment implements View.OnClickListener, MapVi
     public void onMapViewInitialized(MapView mapView) {
         MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(37.5864371, 127.029278);
         this.mapView.setMapCenterPoint(mapPoint, true);
-        if(ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        try {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            }
+        } catch(NullPointerException e) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ex) {
+
+            }
+            Thread.currentThread().interrupt();
         }
     }
 
