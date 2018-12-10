@@ -27,9 +27,9 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private final int MAP_FRAGMENT = 1;
-    private final int LIST_FRAGMENT = 2;
-    private int FRAGMENT_STATE = MAP_FRAGMENT;
+    public static final int MAP_FRAGMENT = 1;
+    public static final int LIST_FRAGMENT = 2;
+    public static int FRAGMENT_STATE = MAP_FRAGMENT;
 
     private Button bt_map, bt_list;
 
@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final int ATM = 4;
 
     public static List<String> listview_iprints;
+    public static List<String> dialog_iprints;
     public static int category = 0;
     public static int section = 0;
     public static HashMap<Integer, ArrayList> sectionBuilding = new HashMap<Integer, ArrayList>();
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 category = position;
-                Toast.makeText(getApplicationContext(), "선택된 번호: " + category, Toast.LENGTH_LONG).show();
+                MapFragment.mapPosition = -1;
                 callFragment(FRAGMENT_STATE);
             }
 
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 section = position;
-                //Toast.makeText(getApplicationContext(), "선택된 번호: " + section, Toast.LENGTH_LONG).show();
+                MapFragment.mapPosition = -1;
                 callFragment(FRAGMENT_STATE);
             }
 
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.mDbHelper = new GostraightDBHelper(this);
         this.mDb = mDbHelper.getReadableDatabase();
         this.listview_iprints = new ArrayList<>();
+        this.dialog_iprints = new ArrayList<>();
 
         cursor = MainActivity.mDb.rawQuery(GostraightDBCtruct.SQL_SELECT, null);
 
@@ -122,8 +124,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             iprinttext += "ATM, ";
                             break;
                     }
-                    iprinttext += cursor.getString(2) + ", " + cursor.getString(3);
+                    iprinttext += cursor.getString(2);
                     this.listview_iprints.add(iprinttext);
+                    this.dialog_iprints.add(cursor.getString(3));
                 }
                 cursor.moveToNext();
             } while(!cursor.isLast());
@@ -153,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void callFragment(int fragment_no){
+    public void callFragment(int fragment_no){
 
         // 프래그먼트 사용을 위해
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

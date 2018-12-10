@@ -1,20 +1,26 @@
 package com.oojahooo.gostraight;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import static com.oojahooo.gostraight.MainActivity.ATM;
 import static com.oojahooo.gostraight.MainActivity.IPRINT;
+import static com.oojahooo.gostraight.MainActivity.MAP_FRAGMENT;
 import static com.oojahooo.gostraight.MainActivity.VENDING;
 import static com.oojahooo.gostraight.MainActivity.WATER;
 import static com.oojahooo.gostraight.MainActivity.category;
+import static com.oojahooo.gostraight.MainActivity.dialog_iprints;
 import static com.oojahooo.gostraight.MainActivity.listview_iprints;
 import static com.oojahooo.gostraight.MainActivity.section;
 import static com.oojahooo.gostraight.MainActivity.sectionBuilding;
@@ -36,17 +42,19 @@ public class ListIprintFragment extends Fragment {
 
         cursor = MainActivity.mDb.rawQuery(GostraightDBCtruct.SQL_SELECT, null);
 
-        if(category != 0 || section != 0) {
-            listview_iprints.clear();
-            String iprinttext;
+        listview_iprints.clear();
+        dialog_iprints.clear();
+        String iprinttext;
 
-            if((cursor != null && cursor.getCount() != 0)) {
-                cursor.moveToFirst();
-                do {
-                    iprinttext = "";
-                    int newcategory = cursor.getInt(1);
+        if((cursor != null && cursor.getCount() != 0)) {
+            cursor.moveToFirst();
+            do {
+                iprinttext = "";
+                int newcategory = cursor.getInt(1);
+                String newbuilding = cursor.getString(2);
 
-                    if(category == 0 || (category != 0 && category == newcategory)) {
+                if(category == 0 || (category != 0 && category == newcategory)) {
+                    if(section == 0 || (section <= 8 && sectionBuilding.get(section).contains(newbuilding))) {
                         switch (newcategory) {
                             case IPRINT:
                                 iprinttext += "아이프린트, ";
@@ -61,15 +69,40 @@ public class ListIprintFragment extends Fragment {
                                 iprinttext += "ATM, ";
                                 break;
                         }
-                        iprinttext += cursor.getString(2) + ", " + cursor.getString(3);
+                        iprinttext += cursor.getString(2);
                         listview_iprints.add(iprinttext);
+                        dialog_iprints.add(cursor.getString(3));
                     }
-                    cursor.moveToNext();
-                } while(!cursor.isLast());
-            }
+                }
+                cursor.moveToNext();
+            } while(!cursor.isLast());
         }
 
+        listview.setOnItemClickListener(new ListViewItemClickListener());
+
         return v;
+    }
+
+    class ListViewItemClickListener implements AdapterView
+
+            .OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            final int thisposition = position;
+            AlertDialog.Builder alertDlg = new AlertDialog.Builder(view.getContext());
+            alertDlg.setPositiveButton(R.string.button_to_map, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    MapFragment.mapPosition = thisposition;
+                    MainActivity.FRAGMENT_STATE = MAP_FRAGMENT;
+                    ((MainActivity)getActivity()).callFragment(MainActivity.MAP_FRAGMENT);
+                }
+            });
+
+            alertDlg.setMessage(dialog_iprints.get(position));
+            alertDlg.show();
+        }
     }
 
 }

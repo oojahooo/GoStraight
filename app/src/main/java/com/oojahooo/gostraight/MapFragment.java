@@ -3,6 +3,7 @@ package com.oojahooo.gostraight;
 import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -25,12 +26,14 @@ import static com.oojahooo.gostraight.MainActivity.VENDING;
 import static com.oojahooo.gostraight.MainActivity.WATER;
 import static com.oojahooo.gostraight.MainActivity.category;
 import static com.oojahooo.gostraight.MainActivity.section;
+import static com.oojahooo.gostraight.MainActivity.sectionBuilding;
 
 public class MapFragment extends Fragment implements View.OnClickListener, MapView.MapViewEventListener, MapView.CurrentLocationEventListener {
 
     private FloatingActionButton fab;
     private MapView mapView;
     private double lat, lon;
+    public static int mapPosition = -1;
 
     Cursor cursor;
 
@@ -38,7 +41,6 @@ public class MapFragment extends Fragment implements View.OnClickListener, MapVi
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //TODO: Spinner 연동
         View v = inflater.inflate(R.layout.fragment_map, container, false);
         this.mapView = new MapView(getActivity());
         ViewGroup mapViewContainer = (ViewGroup) v.findViewById(R.id.map_view);
@@ -48,33 +50,42 @@ public class MapFragment extends Fragment implements View.OnClickListener, MapVi
 
         mapView.removeAllPOIItems();
 
+        int tempPosition = 0;
         if ((cursor != null && cursor.getCount() != 0)) {
             cursor.moveToFirst();
             do {
                 int newcategory = cursor.getInt(1);
+                String newbuilding = cursor.getString(2);
                 if(category == 0 || (category != 0 && category == newcategory)) {
-                    lat = cursor.getDouble(4);
-                    lon = cursor.getDouble(5);
-                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lon);
-                    MapPOIItem marker = new MapPOIItem();
-                    switch (newcategory) {
-                        case IPRINT:
-                            marker.setItemName("아이프린트");
-                            break;
-                        case WATER:
-                            marker.setItemName("정수기");
-                            break;
-                        case VENDING:
-                            marker.setItemName("자판기");
-                            break;
-                        case ATM:
-                            marker.setItemName("ATM");
-                            break;
+                    if(section == 0 || (section <= 8 && sectionBuilding.get(section).contains(newbuilding))) {
+                        lat = cursor.getDouble(4);
+                        lon = cursor.getDouble(5);
+                        MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(lat, lon);
+                        MapPOIItem marker = new MapPOIItem();
+                        switch (newcategory) {
+                            case IPRINT:
+                                marker.setItemName("아이프린트");
+                                break;
+                            case WATER:
+                                marker.setItemName("정수기");
+                                break;
+                            case VENDING:
+                                marker.setItemName("자판기");
+                                break;
+                            case ATM:
+                                marker.setItemName("ATM");
+                                break;
+                        }
+                        marker.setShowDisclosureButtonOnCalloutBalloon(false);
+                        marker.setMapPoint(mapPoint);
+                        marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
+                        marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
+                        this.mapView.addPOIItem(marker);
+                        if(mapPosition >= 0 && tempPosition == mapPosition) {
+                            mapView.selectPOIItem(marker, true);
+                        }
+                        tempPosition++;
                     }
-                    marker.setMapPoint(mapPoint);
-                    marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
-                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
-                    this.mapView.addPOIItem(marker);
                 }
                 cursor.moveToNext();
             } while (!cursor.isLast());
@@ -122,6 +133,19 @@ public class MapFragment extends Fragment implements View.OnClickListener, MapVi
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(getActivity(), "위치권한을 받았습니다.", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    Toast.makeText(getActivity(), "위치권한이 거부되었습니다. 현위치 기능을 사용할 수 없습니다.", Toast.LENGTH_LONG).show();
+                }
+        }
+    }
+
+    @Override
     public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapCenterPoint) {
         this.lat = mapCenterPoint.getMapPointGeoCoord().latitude;
         this.lon = mapCenterPoint.getMapPointGeoCoord().longitude;
@@ -132,7 +156,11 @@ public class MapFragment extends Fragment implements View.OnClickListener, MapVi
 
     @Override
     public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
-        mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
+        try {
+            if (mapView.getCurrentLocationTrackingMode() != MapView.CurrentLocationTrackingMode.TrackingModeOff)
+                mapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
+        } catch (NullPointerException e) {
+        }
     }
 
     @Override
